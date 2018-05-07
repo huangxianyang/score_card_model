@@ -1204,3 +1204,138 @@ def _score_cal(basepoints, odds, PDO):
     beta = PDO / np.log(2)
     alpha = basepoints - beta * np.log(odds)
     return alpha, beta
+
+##############################################################################################
+#statsmodels评分卡
+def draw_roc(y_pred, y_test, ks=True):
+    """
+    ROC及KS曲线
+    ------------------
+    参数: y_pred: series or narray
+         y_test: Series or narray
+    """
+    from sklearn.metrics import accuracy_score
+    tprlist = []
+    fprlist = []
+    auc = 0
+    ks_list, m1, m2, ks_value = [], [], [], 0
+    for i in range(1, 1001):
+        thres = 1 - i / 1000
+        yp = []
+        for item in y_pred:
+            if item > thres:
+                yp.append(1)
+            else:
+                yp.append(0)
+        Nobs = len(y_test)
+        h1 = sum(yp)
+        t1 = sum(y_test)
+        fn = int((sum(abs(y_test - yp)) + t1 - h1) / 2)
+        tp = t1 - fn
+        fp = h1 - tp
+        tn = Nobs - h1 - fn
+        fpr = fp / (fp + tn)
+        tpr = tp / (tp + fn)
+        tprlist.append(tpr)
+        fprlist.append(fpr)
+        ks_list.append(tpr - fpr)
+    for i in range(999):
+        auc = auc + (fprlist[i + 1] - fprlist[i]) * tprlist[i]
+    print("auc=", auc)
+    plt.plot(fprlist, tprlist)
+    plt.show()
+    if ks:
+        for i in range(10):
+            m1.append(tprlist[i * 100])
+            m2.append(fprlist[i * 100])
+        ks_value = max(ks_list)
+        print('ks value=', ks_value)
+        x1 = range(10)
+        x_axis = []
+        for i in x1:
+            x_axis.append(i / 10)
+        plt.plot(x_axis, m1)
+        plt.plot(x_axis, m2)
+        plt.show()
+        y_pred01 = []
+        for item in y_pred:
+            if item > 0.5:
+                y_pred01.append(1)
+            else:
+                y_pred01.append(0)
+        print("accuracy score=", accuracy_score(y_pred01, y_test))
+ 
+
+def logitreg(df, k=0, ks=True):
+    """
+    logitmodel
+    ============
+    参数:
+    df:dataframe
+    k=0,int,
+    ks=True
+    """
+    import statsmodels.api as sm
+    from sklearn.model_selection import train_test_split 
+    
+#     x = df
+#     x1, x0 = x[x['target'] == 1], x[x['target'] == 0]
+#     y1, y0 = x1['target'], x0['target']
+#     x1_train, x1_test, y1_train, y1_test = train_test_split(x1, y1, random_state=0)
+#     x0_train, x0_test, y0_train, y0_test = train_test_split(x0, y0, random_state=0)
+#     x_train, x_test, y_train, y_test = pd.concat([x0_train, x1_train]), pd.concat([x0_test, x1_test]), pd.concat(
+#         [y0_train, y1_train]), pd.concat([y0_test, y1_test])
+#     x_train, x_test = sm.add_constant(x_train.iloc[:, 1:]), sm.add_constant(x_test.iloc[:, 1:])
+    x_train,x_test,y_train,y_test = train_test_split(df.drop("target",axis=1),df["target"],test_size=0.3,random_state=0)
+    x_train, x_test = sm.add_constant(x_train.iloc[:, 1:]), sm.add_constant(x_test.iloc[:, 1:])
+    var = list(x_train)[1:]
+    st = set()
+    st.add("const")
+
+    while True:
+        pvs = []
+        for item in var:
+            if item not in st:
+                l = list(st) + [item]
+                xx = x_train[l]
+                logit_mod = sm.OLS(y_train, xx) #我的Python版本不支持logit
+                logitres = logit_mod.fit()
+                pvs.append([item, logitres.pvalues[item]])
+        v = sorted(pvs, key=lambda x: x[1])[0]  
+        if v[1] < 0.05:
+            st.add(v[0])
+            continue  #while语法有误,此处加continue
+        else:
+            break
+
+        ltest = list(st)
+        xtest = x_train[ltest]
+        test_mod = sm.OLS(y_train, xtest)
+        testres = test_mod.fit()
+        for item in set(st): #迭代过程不应该更改集合大小
+            if testres.pvalues[item] > 0.05:
+                st.remove(item)
+                print("We have removed item:", item)
+
+    print("the list to use for logistic regression:", st)
+
+    luse = list(st)
+    vars_to_del = []
+    for item in var:
+        if item not in luse:
+            vars_to_del.append(item)
+
+    for item in vars_to_del:
+        var.remove(item) #此处将pop改为remove
+
+    xuse = x_train[luse]
+    logit_mod = sm.OLS(y_train, xuse)
+    logit_res = logit_mod.fit()
+    print(logit_res.summary())
+    print("the roc and ks of train set is:")
+    y_pred = np.array(logit_res.predict(x_test[luse]))
+    draw_roc(y_pred, y_test, ks)
+    print("the roc and ks of test set is:")
+    y_ptrain = np.array(logit_res.predict(x_train[luse]))
+    draw_roc(y_ptrain, y_train, ks)
+    return logit_res, luse
