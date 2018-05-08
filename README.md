@@ -22,3 +22,4 @@ WOE转换:  单个特征woe及iv值计算函数 woe_single_x, 单个特征woe转
     Return
     creditCard: pandas dataframe
 """
+statsmodels评分卡函数logitreg,输出ks及roc曲线
