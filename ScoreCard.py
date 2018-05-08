@@ -820,7 +820,7 @@ def get_feature(X,y,n_estimators):
     feat_names = X.columns
     indices = np.argsort(importances)[::-1]
     fig = plt.figure(figsize=(20,6))
-    plt.title("随机森林模型特征权重")
+    plt.title("feature importance")
     plt.bar(range(len(indices)), importances[indices], color='lightblue',  align="center")
     plt.step(range(len(indices)), np.cumsum(importances[indices]), where='mid', label='Cumulative')
     plt.xticks(range(len(indices)), feat_names[indices], rotation='vertical',fontsize=14)
