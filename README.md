@@ -5,21 +5,4 @@
 WOE转换:  单个特征woe及iv值计算函数 woe_single_x, 单个特征woe转换函数 _single_woe_trans, 批量特征woe转换 woe_trans
 特征权重函数:基于随机森林模型特征函数get_feature,信息价值函数 woe_trans 
 模型评估: 混淆矩阵 plot_confusion_matrix , roc曲线 plot_roc_curve,ks曲线ks_stats, 提升图lift_lorenz
-评分卡生成: creditCards
-评分卡生成函数参数: 
-"""
-   output credit card for each var in model
-    --------------------------------------------
-    ParamsEst: pandas Series, params estimate results in logistic model,
-               index is param names,value is  estimate results
-    bin_maps: dict, key is varname of paramEst , value is pandas dataframe contains map table
-    red_maps: dict, key is varname of paramEst, value is pandas dataframe contains redCats table
-    woe_maps: dict, key is varname of paramEst, value is also a dict contain binNumber--woe
-    basepoints: expect base points
-    odds: reciprocal of Odds
-    PDO: double coefficients
-    -------------------------------------------
-    Return
-    creditCard: pandas dataframe
-"""
-statsmodels评分卡函数logitreg,输出ks及roc曲线
+评分卡生成: creditCards, statsmodels评分卡函数logitreg,输出ks及roc曲线,特征相关系数get_corr
