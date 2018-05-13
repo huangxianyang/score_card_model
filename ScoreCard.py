@@ -1211,8 +1211,9 @@ def draw_roc(y_pred, y_test, ks=True):
     """
     ROC及KS曲线
     ------------------
-    参数: y_pred: series or narray
-         y_test: Series or narray
+    parametter: y_pred: series or narray
+                y_test: Series or narray
+    return:roc曲线和KS曲线
     """
     from sklearn.metrics import accuracy_score
     tprlist = []
@@ -1270,10 +1271,12 @@ def logitreg(df, k=0, ks=True):
     """
     logitmodel
     ============
-    参数:
+    parameter:
     df:dataframe
     k=0,int,
     ks=True
+    return:
+        roc and KS
     """
     import statsmodels.api as sm
     from sklearn.model_selection import train_test_split 
