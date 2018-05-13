@@ -1339,3 +1339,24 @@ def logitreg(df, k=0, ks=True):
     y_ptrain = np.array(logit_res.predict(x_train[luse]))
     draw_roc(y_ptrain, y_train, ks)
     return logit_res, luse
+
+#########################################################################
+#特征工程
+def get_corr(data_new,figsize):
+    """
+    特征相关系数
+    ------------------------
+    parameter:
+    data_new: dataFrame,columns must be number
+    figsize: tupe,two number
+    return:
+            heatmap
+    """
+    #相关系数分析
+    colormap = plt.cm.viridis
+    plt.figure(figsize=figsize)
+    plt.title('皮尔森相关性系数', y=1.05, size=8)
+    mask = np.zeros_like(data_new.corr(),dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+    sns.heatmap(data_new.corr(),linewidths=0.1,vmax=1.0, square=True, cmap=colormap, linecolor='white', annot=True,mask=mask)
+    
