@@ -1362,4 +1362,29 @@ def get_corr(data_new,figsize):
     mask = np.zeros_like(data_new.corr(),dtype=np.bool)
     mask[np.triu_indices_from(mask)] = True
     sns.heatmap(data_new.corr(),linewidths=0.1,vmax=1.0, square=True, cmap=colormap, linecolor='white', annot=True,mask=mask)
-    
+   
+#########################################################################
+#网络搜索
+def param_search(X,y):
+    """
+    最优参数搜索
+    -----------------------
+    parametter:
+        X:dataframe
+        y:Series
+    return:
+        best_params: dict
+    """
+    from sklearn.linear_model import LogisticRegression 
+    from sklearn.model_selection import KFold 
+    from sklearn.model_selection import GridSearchCV 
+
+    param_grid ={"penalty": ["l1","l2"],"C":[0.00001,0.0001,0.001,0.01,0.1,1,10,100,1000,10000]}
+
+    lg = LogisticRegression()
+    kfold = KFold(n_splits=5)
+    grid_search = GridSearchCV(lg,param_grid=param_grid, cv=kfold)
+
+    grid_search = grid_search.fit(X_train,y_train)
+    print(grid_search.score(X_test,y_test))
+    return grid_search.best_params_
