@@ -97,6 +97,42 @@ def drawHistogram(s, num_bins):
     ax.set_title(r'Histogram of %s: $\mu=%.2f$, $\sigma=%.2f$' % (s.name, mu, sigma))
     plt.show()
 
+########################################################################################
+
+def divide_data(data,target="y", goodlable=0, badlable=1, test_size=0.4):
+    """
+    训练集和测试集划分
+    --------------------------------
+    parameter:
+        data: dataframe
+        target: str
+        goodlable:int
+        badlabel:int
+        test_size:float
+    return:
+        X_train,X_test:dataframe
+        y_train,y_test:Series
+    """
+    #好坏样本划分
+    data_G = data[data[target]==goodlable]
+    data_B = data[data[target]==badlable]
+    feature_name = list(data.drop(target,axis=1).columns)
+    #训练集和测试集样本划分
+    from sklearn.model_selection import train_test_split
+    from sklearn.utils import shuffle
+
+    X_train_G,X_test_G,y_train_G,y_test_G = train_test_split(data_G[feature_name],data_G[target],random_state=0,test_size=test_size)
+    X_train_B,X_test_B,y_train_B,y_test_B = train_test_split(data_B[feature_name],data_B[target],random_state=0,test_size=test_size)
+    X_train,X_test,y_train,y_test = pd.DataFrame(shuffle(pd.concat([X_train_G,X_train_B])),
+                                                 columns=feature_name),pd.DataFrame(shuffle(pd.concat([X_test_G,X_test_B])),
+                                                                                    columns=feature_name),pd.Series(shuffle(pd.concat([y_train_G,y_train_B]))
+                                                                                                                   ),pd.Series(shuffle(pd.concat([y_test_G,y_test_B])))
+    X_train.reset_index(drop=True,inplace=True)
+    X_test.reset_index(drop=True,inplace=True)
+    y_train.reset_index(drop=True,inplace=True)
+    y_test.reset_index(drop=True,inplace=True)
+    return X_train,X_test,y_train,y_test
+
 #########################################################################################
 """
 内置函数
