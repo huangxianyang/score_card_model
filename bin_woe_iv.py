@@ -5,6 +5,35 @@
 特征信息价值 Get_IV()
 特征权重转换 Woe_Trans()
 """
+def moon_bin(X,Y,n=5):
+    """
+   等频分箱
+   ----------------------
+   parameter:
+       X : pandas Series
+       y : pandas Series
+       n : int cut number
+    ----------------------
+    return:
+      d4 : dataframe, result qcut
+   """   
+    
+    import scipy.stats.stats as stats
+    r = 0
+    while np.abs(r) < 1:
+        d1 = pd.DataFrame({"x":X,"y":Y, "Bucket" : pd.qcut(X,n)})
+        d2 = d1.groupby("Bucket",as_index=True)
+        r,p= stats.spearmanr(d2.mean().x,d2.mean().y)
+        n -= 1
+    d3 = pd.DataFrame()
+    d3["min_"+X.name] = d2.min().x
+    d3["max_"+X.name] = d2.max().x
+    d3[Y.name] = d2.sum().y
+    d3["total"] = d2.count().y
+    d3[Y.name + "_rate"] = d2.mean().y
+    d4 = (d3.sort_index(by = 'min_' + X.name)).reset_index(drop = True)
+    return d4
+
 def Woe_Trans(df,good=0,bad=1,y='y'):
     """
     输出woe转换映射
